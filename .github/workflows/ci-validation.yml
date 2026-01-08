@@ -1,0 +1,97 @@
+name: Multi-OS CI Validation
+
+# This workflow validates the repository on multiple operating systems
+# to ensure cross-platform compatibility
+
+on:
+  push:
+    branches:
+      - main
+      - 'release-**'
+      - 'hotfix-**'
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+      fail-fast: false
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Verify repository structure
+        shell: bash
+        run: |
+          echo "Checking required files..."
+          test -f index.html || (echo "index.html not found" && exit 1)
+          test -f game.js || (echo "game.js not found" && exit 1)
+          test -f engine.js || (echo "engine.js not found" && exit 1)
+          test -f base.css || (echo "base.css not found" && exit 1)
+          echo "All required files present ✓"
+      
+      - name: Validate JavaScript syntax
+        shell: bash
+        run: |
+          echo "Validating JavaScript files..."
+          node --check game.js
+          node --check engine.js
+          echo "JavaScript syntax validation passed ✓"
+      
+      - name: Validate HTML structure
+        shell: bash
+        run: |
+          echo "Checking HTML file..."
+          if grep -q "<!DOCTYPE html>" index.html; then
+            echo "HTML DOCTYPE found ✓"
+          else
+            echo "HTML DOCTYPE missing"
+            exit 1
+          fi
+          
+          if grep -q "<canvas" index.html; then
+            echo "Canvas element found ✓"
+          else
+            echo "Canvas element missing"
+            exit 1
+          fi
+          echo "HTML validation passed ✓"
+      
+      - name: Check for common issues
+        shell: bash
+        run: |
+          echo "Checking for common JavaScript issues..."
+          
+          # Check for console.log statements (optional warning)
+          if grep -q "console\.log" game.js engine.js 2>/dev/null; then
+            echo "⚠️  Warning: console.log statements found (consider removing for production)"
+          fi
+          
+          # Check for TODO/FIXME comments
+          if grep -qiE "TODO|FIXME" game.js engine.js 2>/dev/null; then
+            echo "⚠️  Warning: TODO/FIXME comments found"
+          fi
+          
+          echo "Common issues check completed ✓"
+      
+      - name: Validation summary
+        shell: bash
+        run: |
+          echo "================================"
+          echo "✅ Multi-OS validation passed on ${{ matrix.os }}"
+          echo "================================"
