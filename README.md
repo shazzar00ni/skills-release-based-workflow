@@ -85,6 +85,8 @@ To set the stage for later, let's also add a bug that we'll fix as part of the r
 
 Get help: [Post in our discussion board](https://github.com/orgs/skills/discussions/categories/release-based-workflow) &bull; [Review the GitHub status page](https://www.githubstatus.com/)
 
+**CI/CD**: This repository includes [multi-OS CI validation](.github/CI_VALIDATION.md) to ensure cross-platform compatibility.
+
 &copy; 2023 GitHub &bull; [Code of Conduct](https://www.contributor-covenant.org/version/2/1/code_of_conduct/code_of_conduct.md) &bull; [MIT License](https://gh.io/mit)
 
 </footer>
