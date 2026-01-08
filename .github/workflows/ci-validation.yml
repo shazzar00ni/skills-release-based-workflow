@@ -39,10 +39,14 @@ jobs:
         shell: bash
         run: |
           echo "Checking required files..."
-          test -f index.html || (echo "index.html not found" && exit 1)
-          test -f game.js || (echo "game.js not found" && exit 1)
-          test -f engine.js || (echo "engine.js not found" && exit 1)
-          test -f base.css || (echo "base.css not found" && exit 1)
+          REQUIRED_FILES=("index.html" "game.js" "engine.js" "base.css")
+          for file in "${REQUIRED_FILES[@]}"; do
+            if [ ! -f "$file" ]; then
+              echo "❌ $file not found"
+              exit 1
+            fi
+            echo "✓ $file found"
+          done
           echo "All required files present ✓"
       
       - name: Validate JavaScript syntax
@@ -78,12 +82,12 @@ jobs:
           echo "Checking for common JavaScript issues..."
           
           # Check for console.log statements (optional warning)
-          if grep -q "console\.log" game.js engine.js 2>/dev/null; then
+          if grep -q "console\.log" game.js engine.js; then
             echo "⚠️  Warning: console.log statements found (consider removing for production)"
           fi
           
           # Check for TODO/FIXME comments
-          if grep -qiE "TODO|FIXME" game.js engine.js 2>/dev/null; then
+          if grep -qiE "TODO|FIXME" game.js engine.js; then
             echo "⚠️  Warning: TODO/FIXME comments found"
           fi
           
